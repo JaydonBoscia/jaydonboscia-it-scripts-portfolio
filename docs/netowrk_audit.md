@@ -19,3 +19,13 @@ to assist with diagnosing network issues.
 - Data communications
 - Python scripting
 - Systems analysis
+
+## Error Handling
+The script includes error handling to account for:
+- DNS resolution failures
+- Disconnected or unavailable network interfaces
+- Connectivity test failures
+
+This ensures the script provides useful diagnostic output
+instead of failing silently or crashing.
+

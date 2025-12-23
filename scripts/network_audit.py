@@ -5,21 +5,41 @@ import subprocess
 from datetime import datetime
 
 def get_hostname_info():
-    hostname = socket.gethostname()
-    ip_address = socket.gethostbyname(hostname)
-    return hostname, ip_address
+    try:
+        hostname = socket.gethostname()
+        ip_address = socket.gethostbyname(hostname)
+        return hostname, ip_address
+    except socket.gaierror:
+        return "UNKNOWN", "IP RESOLUTION FAILED"
+
 
 def get_network_interfaces():
-    if os.name == "nt":
-        return subprocess.getoutput("ipconfig /all")
-    else:
-        return subprocess.getoutput("ifconfig -a")
+    try:
+        if os.name == "nt":
+            output = subprocess.getoutput("ipconfig /all")
+        else:
+            output = subprocess.getoutput("ifconfig -a")
+
+        if not output.strip():
+            return "No network interfaces detected."
+        return output
+    except Exception as e:
+        return f"Error retrieving interfaces: {e}"
+
 
 def test_connectivity():
     target = "8.8.8.8"
     param = "-n" if platform.system().lower() == "windows" else "-c"
     command = ["ping", param, "4", target]
-    return subprocess.getoutput(" ".join(command))
+
+    try:
+        result = subprocess.getoutput(" ".join(command))
+        if "unreachable" in result.lower():
+            return "Network unreachable."
+        return result
+    except Exception as e:
+        return f"Ping test failed: {e}"
+
 
 def write_report(content):
     filename = f"network_audit_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
